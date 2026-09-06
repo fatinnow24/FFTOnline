@@ -2,3 +2,209 @@ online A:
 python hybrid_image_template.py --low-image images/sunset512.png --high-image images/skyline512.png --kernel-size 31 --engine fft --color --out-dir outputs/lab_hybrid_student
 
 python a_23.py --low-image images/sunset512.png --high-image images/skyline512.png --kernel-size 31 --engine fft --out-dir outputs/lab_hybrid_student
+
+
+
+
+
+
+
+Yes. The important idea is that the full convolution is larger than the original image, and the kernel causes the “center” of the convolution to be offset. So at the end, you need to crop the correct \(H\times W\) region.
+
+Your code does:
+
+orig_row = kh // 2
+orig_col = kw // 2
+
+final = result[
+    orig_row:orig_row+H,
+    orig_col:orig_col+W
+]
+
+Let's see exactly why.
+
+1. Why is result bigger?
+
+Suppose your image is:
+
+$$ H=5,\quad W=5 $$
+
+and your kernel is:
+
+$$ kh=3,\quad kw=3 $$
+
+Full convolution has size:
+
+$$ H_{\text{full}} = H+kh-1 = 5+3-1=7 $$ $$ W_{\text{full}} = W+kw-1 = 5+3-1=7 $$
+
+So after the frequency-domain convolution, result is effectively:
+
+7 × 7
+
+But we want our final image to be:
+
+5 × 5
+2. Why don't we simply take result[:H, :W]?
+
+Because the kernel is centered around each pixel.
+
+For a \(3\times3\) kernel:
+
+k k k
+k k k
+k k k
+
+the center is:
+
+k k k
+k X k
+k k k
+    ↑
+  center
+
+The center is at:
+
+$$ \left(\frac{3}{2},\frac{3}{2}\right) $$
+
+Using integer division:
+
+3 // 2 = 1
+
+So the center is offset by 1 row and 1 column.
+
+That's why:
+
+orig_row = kh // 2   # 1
+orig_col = kw // 2   # 1
+3. Example with a 5×5 image and 3×3 kernel
+
+Suppose the full convolution produces:
+
+result (7×7)
+
+  0 1 2 3 4 5 6
+0 . . . . . . .
+1 . A B C D E .
+2 . F G H I J .
+3 . K L M N O .
+4 . P Q R S T .
+5 . U V W X Y .
+6 . . . . . . .
+
+We want a 5×5 output corresponding to the original image's pixels.
+
+Because:
+
+orig_row = 1
+orig_col = 1
+
+we start at:
+
+result[1][1]
+
+and take 5 rows and 5 columns.
+
+So we select:
+
+A B C D E
+F G H I J
+K L M N O
+P Q R S T
+U V W X Y
+
+That's exactly what:
+
+final = result[1:6, 1:6]
+
+does.
+
+And your expression:
+
+result[
+    orig_row:orig_row+H,
+    orig_col:orig_col+W
+]
+
+becomes:
+
+result[
+    1:1+5,
+    1:1+5
+]
+
+which is:
+
+result[1:6, 1:6]
+4. What if the kernel is 5×5?
+
+Now:
+
+$$ kh=5,\quad kw=5 $$
+
+Therefore:
+
+orig_row = 5 // 2 = 2
+orig_col = 5 // 2 = 2
+
+Suppose the image is still \(5\times5\).
+
+Full convolution:
+
+$$ 5+5-1=9 $$
+
+so result is \(9\times9\).
+
+We want to extract:
+
+result[2:7, 2:7]
+
+because:
+
+starting row = 2
+5 rows       = 2,3,4,5,6
+
+starting col = 2
+5 columns    = 2,3,4,5,6
+
+So the general rule is:
+
+$$ \boxed{\text{start row}=\lfloor kh/2\rfloor} $$ $$ \boxed{\text{start column}=\lfloor kw/2\rfloor} $$
+5. Why both are needed
+
+You have:
+
+orig_row = kh // 2
+orig_col = kw // 2
+
+because the kernel can have different heights and widths.
+
+For example, a \(3\times5\) kernel:
+
+kh = 3
+kw = 5
+
+gives:
+
+orig_row = 3 // 2 = 1
+orig_col = 5 // 2 = 2
+
+So you crop starting from:
+
+result[1:1+H, 2:2+W]
+
+The row and column offsets don't necessarily have to be the same.
+
+In one sentence
+
+orig_row and orig_col tell you where the original image-sized region begins inside the larger full-convolution result, because the kernel's center is offset from its top-left corner.
+
+So this:
+
+final = result[
+    orig_row:orig_row+H,
+    orig_col:orig_col+W
+]
+
+means:
+
+"From the full convolution, start at the kernel's center offset and take exactly the original image's H × W size."

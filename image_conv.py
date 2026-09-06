@@ -63,7 +63,7 @@ def transform_2d(plane, engine):
     for j in range(cols):
         result[:,j] = engine.transform(result[:,j])
     return result
-
+    #one dft takes o(N2), for N rows, total dft cost= o(N3), same for N columns
 
 def inverse_2d(spectrum, engine):
     """

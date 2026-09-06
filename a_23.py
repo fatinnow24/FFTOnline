@@ -40,9 +40,9 @@ def choose_transform_shape(image_shape, kernel_shape, engine):
     if engine.name == "fft":
         # Adjust both dimensions to lengths supported by the radix-2 engine.
         # return
-        return (next_power_of_two(M),next_power_of_two(N))
+        return next_power_of_two(M),next_power_of_two(N)
         #raise NotImplementedError("TODO 1: radix-2 transform shape")
-    return (M,N)
+    return M,N
     # Other engines can use the minimum dimensions calculated above.
     # return
     #raise NotImplementedError("TODO 1: linear-convolution transform shape")
