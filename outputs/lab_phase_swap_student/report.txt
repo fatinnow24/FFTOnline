@@ -1,0 +1,9 @@
+Lab evaluation -- Fourier magnitude-phase swap
+image A              : images/sunset512.png
+image B              : images/skyline512.png
+image shape          : (512, 512)
+engine               : fft
+worst relative magnitude error : 1.996e-15
+worst phase-vector error       : 8.168e-12
+worst relative energy error    : 2.371e-15
+verification         : MATCH

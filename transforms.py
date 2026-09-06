@@ -697,3 +697,10 @@ class DTFTAnalyzer:
         H = self.transform(h, omega)
 
         return X * H
+    
+    
+# 1   2   3   4   5
+# 6   7x1   8x1  9x1   10
+# 11  12x1  13x1  14x1  15
+# 16  17x1  18x1  19x1  20
+# 21  22  23  24  25
