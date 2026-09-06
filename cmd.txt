@@ -1,0 +1,24 @@
+FOR TASK A:
+
+python bigmul.py inputs/1.txt --engine dft --out-dir outputs/task_a/1
+python bigmul.py inputs/2.txt --engine dft --out-dir outputs/task_a/2
+python bigmul.py inputs/3.txt --engine fft --out-dir outputs/task_a/3
+python bigmul.py inputs/4.txt --engine fft --out-dir outputs/task_a/4
+python bigmul.py --benchmark --out-dir outputs/task_a/benchmark
+python bigmul.py inputs/4.txt --engine ntt --out-dir outputs/task_a/4_ntt
+
+FOR TASK B:
+
+python image_conv.py images/skyline512.png --kernel bokeh --param 9 --engine fft --out-dir outputs/task_b/skyline_bokeh
+python image_conv.py images/sunset512.png --gray --kernel motion --param 41 --engine fft --out-dir outputs/task_b/sunset_motion
+python image_conv.py images/nebula512.png --kernel bokeh --param 13 --engine fft --out-dir outputs/task_b/nebula_bokeh
+python image_conv.py images/skyline256.png --gray --kernel gaussian --param 21 --engine dft --out-dir outputs/task_b/skyline256_gaussian_dft
+python image_conv.py images/skyline512.png --benchmark --out-dir outputs/task_b/benchmark
+
+BONUS FOR TASK A:
+python bigmul.py inputs/2.txt --engine arbitrary --out-dir outputs/task_a/2_arbitrary
+python bigmul.py inputs/3.txt --engine arbitrary --out-dir outputs/task_a/3_arbitrary
+
+BONUS FOR TASK B:
+python image_conv.py images/nebula512.png --kernel bokeh --param 13 --engine arbitrary --out-dir outputs/task_b/nebula_bokeh_arbitrary
+python image_conv.py images/skyline256.png --gray --kernel gaussian --param 21 --engine arbitrary --out-dir outputs/task_b/skyline256_gaussian_arbitrary
