@@ -1,2 +1,4 @@
 online A:
-python hybrid_image_template.py --low-image images/sunset512.png --high-image images/skyline512.png --kernel-size 31 --engine fft --out-dir outputs/lab_hybrid_student
+python hybrid_image_template.py --low-image images/sunset512.png --high-image images/skyline512.png --kernel-size 31 --engine fft --color --out-dir outputs/lab_hybrid_student
+
+python a_23.py --low-image images/sunset512.png --high-image images/skyline512.png --kernel-size 31 --engine fft --out-dir outputs/lab_hybrid_student

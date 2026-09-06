@@ -70,22 +70,22 @@ def to_limbs(text, base_digits=BASE_DIGITS):
         sees it.
     """
     # TODO: implement this function
-    text = text.strip()
-    sign = 1
-    if (text[0]=='-'):
+    text = text.strip() #remove leading and lagging zeros
+    sign = 1 #assume numbers positive
+    if (text[0]=='-'): #if negative, overturn sign
         sign = -1
+        text = text[1:] #then install the number
+    elif (text[0]=='+'): #if positive, sign doesnt require changing
         text = text[1:]
-    elif (text[0]=='+'):
-        text = text[1:]
-    text = text.lstrip('0')
-    if (text == ''):
+    text = text.lstrip('0') #remove leading 0s cz they are unnecessary
+    if (text == ''): #if the number was indeed 0, return sign, 0
         return 1, np.array([0],dtype=np.int64)
-    limbs = []
-    for end in range(len(text), 0, -base_digits):
-        start = max(0, end - base_digits)
-        limbs.append(int(text[start:end]))
-    return sign, np.array(limbs, dtype=np.int64)
-
+    limbs = [] #if not 0, we have ourselves a number
+    for end in range(len(text), 0, -base_digits): #for 123456789, this will be (9,0,-4), so 9, 5,1 
+        start = max(0, end - base_digits) #first iteration: start = 5
+        limbs.append(int(text[start:end])) #first iteration: text[5:9], which gives 6789, appended, next 2345, last 1
+    return sign, np.array(limbs, dtype=np.int64) #returns 1, [6789,2345,1] 
+    #6789*10000^0 + 2345*10000^1 +1*10000^2 we get-> 6789 + 2345x +x^2, so we get a polynomial behavior
 
 def from_limbs(sign, limbs, base_digits=BASE_DIGITS):
     """
@@ -102,9 +102,11 @@ def from_limbs(sign, limbs, base_digits=BASE_DIGITS):
         The decimal representation. "0" must come out as "0", not "-0" or "".
     """
     # TODO: implement this function
-    base = 10 ** base_digits
+    # after conv, limbs may not be within base range, like [5000,15000,2]
+    #this needs to become [5000,5000,3]
+    base = 10 ** base_digits #10^4
     limbs = np.asarray(limbs, dtype=np.int64).copy()
-    carry = 0
+    carry = 0 #initially consider carry = 0
     for i in range(len(limbs)):
         value = int(limbs[i]) + carry
         limbs[i] = value % base
@@ -119,7 +121,8 @@ def from_limbs(sign, limbs, base_digits=BASE_DIGITS):
     result = str(limbs[-1])
     
     for i in range(len(limbs) -2, -1, -1):
-        result += str(limbs[i]).zfill(base_digits)
+        result += str(limbs[i]).zfill(base_digits)#if 4 digits are not present in each limb now
+        #it fills the remaining needed space with 0
     if sign < 0:
         result = "-" + result
     return result
@@ -157,7 +160,10 @@ def multiply_transform(a, b, engine):
     # TODO: implement this function
     N = len(a) + len(b) - 1
     N = next_power_of_two(N)
-
+    #this is basically y= x*h but we obtain it using
+    #y = Inverse(transform(x)*transform(h))
+    #in order to transform, we need complex array as result may be complex
+    #however the convolved output may be real
     a_padded = np.zeros(N, dtype=np.complex128)
     b_padded = np.zeros(N, dtype=np.complex128)
     a_padded[:len(a)] = a
